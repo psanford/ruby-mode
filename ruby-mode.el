@@ -123,7 +123,7 @@ This should only be called after matching against `ruby-here-doc-end-re'."
 
 (defconst ruby-negative
   (concat "^[ \t]*\\(\\(" ruby-block-mid-re "\\)\\>\\|"
-          ruby-block-end-re "\\|}\\|\\]\\)")
+          ruby-block-end-re "\\|}\\|\\]\\|)\\)")
   "Regexp to match where the indentation gets shallower.")
 
 (defconst ruby-operator-re "[-,.+*/%&|^~=<>:]"
@@ -768,7 +768,7 @@ and `\\' when preceded by `?'."
           (setq indent (ruby-indent-size (current-column) (nth 2 state))))
          (t
           (setq indent (+ (current-column) ruby-indent-level)))))
-       
+
        ((and (nth 2 state) (< (nth 2 state) 0)) ; in negative nest
         (setq indent (ruby-indent-size (current-column) (nth 2 state)))))
       (when indent
