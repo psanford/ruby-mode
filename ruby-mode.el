@@ -24,6 +24,9 @@
 ;; Still needs more docstrings; search below for TODO.
 ;;
 
+;; This version has a few changes to the default indentation rules.
+;; See http://github.com/psanford/ruby-mode for more details.
+
 ;;; Code:
 
 (eval-when-compile (require 'cl))

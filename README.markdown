@@ -1,7 +1,7 @@
 Emacs ruby mode
 ===============
 
-This is a fork of ruby-mode.el in elpa with a few changes to the indentation rules. This is the style we use at Nearbuy Systems (nearbuysystems.com).
+This is a fork of ruby-mode.el in elpa with a few changes to the indentation rules. This is the style we use at Nearbuy Systems (http://nearbuysystems.com).
 
 Closing Paren
 -------------
