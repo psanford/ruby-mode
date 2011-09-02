@@ -476,7 +476,7 @@ and `\\' when preceded by `?'."
           ((error "unterminated string")))))
 
 (defun ruby-deep-indent-paren-p (c)
-    "TODO: document."
+  "TODO: document."
   (cond ((listp ruby-deep-indent-paren)
          (let ((deep (assoc c ruby-deep-indent-paren)))
            (cond (deep
@@ -487,7 +487,7 @@ and `\\' when preceded by `?'."
         ((eq c ?\( ) ruby-deep-arglist)))
 
 (defun ruby-parse-partial (&optional end in-string nest depth pcol indent)
-    "TODO: document throughout function body."
+  "TODO: document throughout function body."
   (or depth (setq depth 0))
   (or indent (setq indent 0))
   (when (re-search-forward ruby-delimiter end 'move)
@@ -574,7 +574,10 @@ and `\\' when preceded by `?'."
                 (setq pcol (cons (cons pnt depth) pcol))
                 (setq depth 0))
             (setq nest (cons (cons (char-after (point)) pnt) nest))
-            (setq depth (1+ depth))))
+            (save-excursion
+              (forward-char)
+              (if (not (looking-at "[\\[{(]"))
+                  (setq depth (1+ depth))))))
         (goto-char pnt)
         )
        ((looking-at "[])}]")
@@ -598,7 +601,10 @@ and `\\' when preceded by `?'."
                       (eq ?? w))))
             nil
           (setq nest (cdr nest))
-          (setq depth (1- depth)))
+          (save-excursion
+            (forward-char)
+            (if (not (looking-at "[])}]"))
+                (setq depth (1- depth)))))
         (goto-char pnt))
        ((looking-at "def\\s +[^(\n;]*")
         (if (or (bolp)
