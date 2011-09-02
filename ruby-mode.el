@@ -571,10 +571,10 @@ and `\\' when preceded by `?'."
               (progn
                 (and (eq deep 'space) (looking-at ".\\s +[^# \t\n]")
                      (setq pnt (1- (match-end 0))))
-                (setq nest (cons (cons (char-after (point)) pnt) nest))
+                (setq nest (cons (list (char-after (point)) pnt depth) nest))
                 (setq pcol (cons (cons pnt depth) pcol))
                 (setq depth 0))
-            (setq nest (cons (cons (char-after (point)) pnt) nest))
+            (setq nest (cons (list (char-after (point)) pnt depth) nest))
             ;;XXX
             ;; (setq depth (1+ depth))))
             (save-excursion
@@ -586,16 +586,9 @@ and `\\' when preceded by `?'."
         (goto-char pnt)
         )
        ((looking-at "[])}]")
-        (message "close thingy at %s" (point))
-        (save-excursion
-          (forward-char)
-          (when (not (and
-                      (looking-at "[])}]")
-                      (not (> (cdar nest) (line-beginning-position)))))
-            (backward-char)
-            (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
-                (setq depth (cdr (car pcol)) pcol (cdr pcol)))
-            (setq depth (1- depth))))
+        (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
+            (setq depth (cdr (car pcol)) pcol (cdr pcol))
+          (setq depth (1- depth)))
         (setq nest (cdr nest))
         (goto-char pnt))
        ((looking-at ruby-block-end-re)
@@ -629,7 +622,7 @@ and `\\' when preceded by `?'."
                   (forward-char -1)
                   (not (eq ?_ (char-after (point))))))
             (progn
-              (setq nest (cons (cons nil pnt) nest))
+              (setq nest (cons (list nil pnt depth) nest))
               (setq depth (1+ depth))))
         (goto-char (match-end 0)))
        ((looking-at (concat "\\<\\(" ruby-block-beg-re "\\)\\>"))
@@ -655,7 +648,7 @@ and `\\' when preceded by `?'."
          (or (not (looking-at ruby-modifier-re))
              (ruby-expr-beg 'modifier))
          (goto-char pnt)
-         (setq nest (cons (cons nil pnt) nest))
+         (setq nest (cons (list nil pnt depth) nest))
          (setq depth (1+ depth)))
         (goto-char pnt))
        ((looking-at ":\\(['\"]\\)")
@@ -758,7 +751,7 @@ and `\\' when preceded by `?'."
        ((nth 0 state)                   ; within string
         (setq indent nil))              ;  do nothing
        ((car (nth 1 state))             ; in paren
-        (goto-char (setq begin (cdr (nth 1 state))))
+        (goto-char (setq begin (nth 1 (nth 1 state))))
         (let ((deep (ruby-deep-indent-paren-p (car (nth 1 state)))))
           (if deep
               (cond ((and (eq deep t) (eq (car (nth 1 state)) paren))
@@ -766,7 +759,7 @@ and `\\' when preceded by `?'."
                      (setq indent (1- (current-column))))
                     ((let ((s (ruby-parse-region (point) indent-point)))
                        (and (nth 2 s) (> (nth 2 s) 0)
-                            (or (goto-char (cdr (nth 1 s))) t)))
+                            (or (goto-char (nth 1 (nth 1 s))) t)))
                      (forward-word -1)
                      (setq indent (ruby-indent-size (current-column) (nth 2 state))))
                     (t
@@ -782,9 +775,9 @@ and `\\' when preceded by `?'."
                (search-backward (char-to-string paren))
                (setq indent (current-column)))))
        ((and (nth 2 state) (> (nth 2 state) 0)) ; in nest
-        (if (null (cdr (nth 1 state)))
+        (if (null (nth 1 (nth 1 state)))
             (error "invalid nest"))
-        (goto-char (cdr (nth 1 state)))
+        (goto-char (nth 1 (nth 1 state)))
         (forward-word -1)               ; skip back a keyword
         (setq begin (point))
         (cond
@@ -836,7 +829,7 @@ and `\\' when preceded by `?'."
               (setq end nil))
             (goto-char (or end pos))
             (skip-chars-backward " \t")
-            (setq begin (if (and end (nth 0 state)) pos (cdr (nth 1 state))))
+            (setq begin (if (and end (nth 0 state)) pos (nth 1 (nth 1 state))))
             (setq state (ruby-parse-region parse-start (point))))
           (or (bobp) (forward-char -1))
           (and
