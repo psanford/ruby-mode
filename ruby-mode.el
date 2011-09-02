@@ -488,6 +488,7 @@ and `\\' when preceded by `?'."
 
 (defun ruby-parse-partial (&optional end in-string nest depth pcol indent)
   "TODO: document throughout function body."
+  (message "%s %s %s %s %s %s" end in-string nest depth pcol indent)
   (or depth (setq depth 0))
   (or indent (setq indent 0))
   (when (re-search-forward ruby-delimiter end 'move)
@@ -574,16 +575,24 @@ and `\\' when preceded by `?'."
                 (setq pcol (cons (cons pnt depth) pcol))
                 (setq depth 0))
             (setq nest (cons (cons (char-after (point)) pnt) nest))
+            ;;XXX
+            ;; (setq depth (1+ depth))))
             (save-excursion
               (forward-char)
               (if (not (looking-at "[\\[{(]"))
-                  (setq depth (1+ depth))))))
+                  (setq depth (1+ depth))
+                (message "skip depth at %s (%s)" (point) depth)
+                ))))
         (goto-char pnt)
         )
        ((looking-at "[])}]")
-        (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
-            (setq depth (cdr (car pcol)) pcol (cdr pcol))
-          (setq depth (1- depth)))
+        (save-excursion
+          (forward-char)
+          (when (not (looking-at "[])}]"))
+            (backward-char)
+            (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
+                (setq depth (cdr (car pcol)) pcol (cdr pcol)))
+            (setq depth (1- depth))))
         (setq nest (cdr nest))
         (goto-char pnt))
        ((looking-at ruby-block-end-re)
@@ -601,10 +610,15 @@ and `\\' when preceded by `?'."
                       (eq ?? w))))
             nil
           (setq nest (cdr nest))
-          (save-excursion
-            (forward-char)
-            (if (not (looking-at "[])}]"))
-                (setq depth (1- depth)))))
+          ;XXX
+          (setq depth (1- depth)))
+          ;; (save-excursion
+          ;;   (forward-char)
+          ;;   (message "looking at %s" (char-after))
+          ;;   (if (not (looking-at "[])}]"))
+          ;;       (setq depth (1- depth))
+          ;;     (message "restore depth at %s (%s)" (point) depth)
+          ;;     )))
         (goto-char pnt))
        ((looking-at "def\\s +[^(\n;]*")
         (if (or (bolp)
