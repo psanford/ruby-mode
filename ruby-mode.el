@@ -586,9 +586,12 @@ and `\\' when preceded by `?'."
         (goto-char pnt)
         )
        ((looking-at "[])}]")
+        (message "close thingy at %s" (point))
         (save-excursion
           (forward-char)
-          (when (not (looking-at "[])}]"))
+          (when (not (and
+                      (looking-at "[])}]")
+                      (not (> (cdar nest) (line-beginning-position)))))
             (backward-char)
             (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
                 (setq depth (cdr (car pcol)) pcol (cdr pcol)))
