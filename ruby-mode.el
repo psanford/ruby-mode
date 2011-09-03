@@ -600,12 +600,10 @@ and `\\' when preceded by `?'."
                 (setq depth 0))
             (setq previous-nest (car nest))
             (setq nest (cons (list (char-after (point)) pnt depth) nest))
-            ;;XXX
             ;; same line as previous open [{(, don't indent again
             (if (and previous-nest
                      (ruby-open-list-p previous-nest)
                      (and (not (eq (car previous-nest) (caar nest)))))
-                ;; (ruby-same-line (point) (nth 1 previous-nest)))
                 nil ;; no-op
               (setq depth (1+ depth)))))
         (goto-char pnt)
@@ -632,15 +630,7 @@ and `\\' when preceded by `?'."
                       (eq ?? w))))
             nil
           (setq nest (cdr nest))
-          ;XXX
           (setq depth (1- depth)))
-          ;; (save-excursion
-          ;;   (forward-char)
-          ;;   (message "looking at %s" (char-after))
-          ;;   (if (not (looking-at "[])}]"))
-          ;;       (setq depth (1- depth))
-          ;;     (message "restore depth at %s (%s)" (point) depth)
-          ;;     )))
         (goto-char pnt))
        ((looking-at "def\\s +[^(\n;]*")
         (if (or (bolp)
