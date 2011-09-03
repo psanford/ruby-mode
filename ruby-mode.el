@@ -929,7 +929,7 @@ and `\\' when preceded by `?'."
 With ARG, move backward multiple defuns. Negative ARG means
 move forward."
   (interactive "p")
-  (and (re-search-backward (concat "^\\(" ruby-block-beg-re "\\)\\b")
+  (and (re-search-backward (concat "^\\(" ruby-block-beg-re "\\)\\_>")
                            nil 'move (or arg 1))
        (beginning-of-line)))
 
@@ -949,7 +949,7 @@ move backward."
   ;; It seems like it should move to the line where indentation should deepen,
   ;; but ruby-indent-beg-re only accounts for whitespace before class, module and def,
   ;; so this will only match other block beginners at the beginning of the line.
-  (and (re-search-backward (concat "^\\(" ruby-indent-beg-re "\\)\\b") nil 'move)
+  (and (re-search-backward (concat "^\\(" ruby-indent-beg-re "\\)\\_>") nil 'move)
        (beginning-of-line)))
 
 (defun ruby-move-to-block (n)

@@ -59,15 +59,16 @@ class Example
     assert_nothing_raised {
       def_from_query_section(request_section)
     }
-      request_section['query']['tables'].delete('customer')
+    request_section['query']['tables'].delete('customer')
+    aaefaefa
   end
 
   def list_of_lists
     Nearbuy::Model::FloorplanLine.create(
       :floorplan_layer => layer,
       :geom => GeoRuby::SimpleFeatures::LineString.from_coordinates([
-        [-1, -1], [1, 1],
-      ])
+      [-1, -1], [1, 1],
+    ])
     )
   end
 
