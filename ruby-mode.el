@@ -486,13 +486,25 @@ and `\\' when preceded by `?'."
         ((eq c ruby-deep-indent-paren) ruby-deep-indent-paren-style)
         ((eq c ?\( ) ruby-deep-arglist)))
 
+(defun ruby-same-line (p1 p2)
+  "Return t if p1 and p2 are on the same line."
+  (save-excursion
+    (goto-char p1)
+    (and (>= p2 (point-at-bol))
+         (<= p2 (point-at-eol)))))
+
+(defun ruby-open-list-p (char)
+  (or (eq char ?\[)
+      ;; (eq char ?\{)
+      (eq char ?\()))
+
 (defun ruby-parse-partial (&optional end in-string nest depth pcol indent)
   "TODO: document throughout function body."
   (message "%s %s %s %s %s %s" end in-string nest depth pcol indent)
   (or depth (setq depth 0))
   (or indent (setq indent 0))
   (when (re-search-forward ruby-delimiter end 'move)
-    (let ((pnt (point)) w re expand)
+    (let ((pnt (point)) w re expand previous-nest)
       (goto-char (match-beginning 0))
       (cond
        ((and (memq (char-before) '(?@ ?$)) (looking-at "\\sw"))
@@ -574,21 +586,22 @@ and `\\' when preceded by `?'."
                 (setq nest (cons (list (char-after (point)) pnt depth) nest))
                 (setq pcol (cons (cons pnt depth) pcol))
                 (setq depth 0))
+            (setq previous-nest (car nest))
             (setq nest (cons (list (char-after (point)) pnt depth) nest))
             ;;XXX
-            ;; (setq depth (1+ depth))))
-            (save-excursion
-              (forward-char)
-              (if (not (looking-at "[\\[{(]"))
-                  (setq depth (1+ depth))
-                (message "skip depth at %s (%s)" (point) depth)
-                ))))
+            ;; same line as previous open [{(, don't indent again
+            (if (and previous-nest
+                     (ruby-open-list-p (car previous-nest)))
+                     ;; (ruby-same-line (point) (nth 1 previous-nest)))
+                (message "no indent at %s" (point))
+              (setq depth (1+ depth)))))
         (goto-char pnt)
         )
        ((looking-at "[])}]")
-        (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
-            (setq depth (cdr (car pcol)) pcol (cdr pcol))
-          (setq depth (1- depth)))
+        ;; (if (ruby-deep-indent-paren-p (matching-paren (char-after)))
+        ;;     (setq depth (cdr (car pcol)) pcol (cdr pcol))
+        ;;   (setq depth (1- depth)))
+        (setq depth (nth 2 (car nest)))
         (setq nest (cdr nest))
         (goto-char pnt))
        ((looking-at ruby-block-end-re)
