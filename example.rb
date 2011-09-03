@@ -66,10 +66,26 @@ class Example
   def list_of_lists
     Nearbuy::Model::FloorplanLine.create(
       :floorplan_layer => layer,
-      :geom => GeoRuby::SimpleFeatures::LineString.from_coordinates([
-      [-1, -1], [1, 1],
-    ])
+      :geom => GeoRuby::SimpleFeatures::LineString.from_coordinates(
+        :nested => 'indent'
+      )
     )
+    Nearbuy::Model::FloorplanLine.create(
+      :floorplan_layer => layer,
+      :geom => GeoRuby::SimpleFeatures::LineString.from_coordinates([
+        [-1, -1], [1, 1],
+      ])
+    )
+  end
+
+  def assert_hash
+    assert_equal( {
+      "customer.name" => cust[0],
+      "customer.email" => cust[0] + '@example.com',
+      "customer.age" => cust[1],
+      "customer.sex" => cust[2],
+      "customer.username"=> nil,
+    }, row.data )
   end
 
   def end_method #this should be spaced correctly

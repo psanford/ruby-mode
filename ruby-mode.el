@@ -495,12 +495,10 @@ and `\\' when preceded by `?'."
 
 (defun ruby-open-list-p (char)
   (or (eq char ?\[)
-      ;; (eq char ?\{)
       (eq char ?\()))
 
 (defun ruby-parse-partial (&optional end in-string nest depth pcol indent)
   "TODO: document throughout function body."
-  (message "%s %s %s %s %s %s" end in-string nest depth pcol indent)
   (or depth (setq depth 0))
   (or indent (setq indent 0))
   (when (re-search-forward ruby-delimiter end 'move)
@@ -591,9 +589,10 @@ and `\\' when preceded by `?'."
             ;;XXX
             ;; same line as previous open [{(, don't indent again
             (if (and previous-nest
-                     (ruby-open-list-p (car previous-nest)))
-                     ;; (ruby-same-line (point) (nth 1 previous-nest)))
-                (message "no indent at %s" (point))
+                     (ruby-open-list-p (car previous-nest))
+                     (and (not (eq (car previous-nest) (caar nest)))))
+                ;; (ruby-same-line (point) (nth 1 previous-nest)))
+                nil ;; no-op
               (setq depth (1+ depth)))))
         (goto-char pnt)
         )
