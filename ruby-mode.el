@@ -493,9 +493,23 @@ and `\\' when preceded by `?'."
     (and (>= p2 (point-at-bol))
          (<= p2 (point-at-eol)))))
 
-(defun ruby-open-list-p (char)
-  (or (eq char ?\[)
-      (eq char ?\()))
+(defun ruby-hash-context-p (start end)
+  "Returns t if it looks like this region has key value pairs"
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char (point-min))
+      (when (search-forward-regexp "\\(=>\\|)\\)" nil t)
+        (string-equal "=>" (match-string 1))))))
+
+(defun ruby-open-list-p (state)
+  "Returns true if it looks like this is the opening of a list or array"
+  (let ((char (car state)))
+    (or
+     (eq char ?\[)
+     (and
+      (eq char ?\()
+      (not (ruby-hash-context-p (nth 1 state) (point)))))))
 
 (defun ruby-parse-partial (&optional end in-string nest depth pcol indent)
   "TODO: document throughout function body."
@@ -589,7 +603,7 @@ and `\\' when preceded by `?'."
             ;;XXX
             ;; same line as previous open [{(, don't indent again
             (if (and previous-nest
-                     (ruby-open-list-p (car previous-nest))
+                     (ruby-open-list-p previous-nest)
                      (and (not (eq (car previous-nest) (caar nest)))))
                 ;; (ruby-same-line (point) (nth 1 previous-nest)))
                 nil ;; no-op

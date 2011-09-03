@@ -29,7 +29,6 @@ class Example
   def crazy_same_line
     (report, rows) = make_test_query([%w{name = Eduardo}])
     assert_equal( 1, rows.length )
-
   end
 
   def nesting_should_happen_here
@@ -60,7 +59,7 @@ class Example
       def_from_query_section(request_section)
     }
     request_section['query']['tables'].delete('customer')
-    aaefaefa
+    some_other_methods
   end
 
   def list_of_lists
@@ -86,6 +85,15 @@ class Example
       "customer.sex" => cust[2],
       "customer.username"=> nil,
     }, row.data )
+  end
+
+  def method_with_nested_hash_args
+    site = Nearbuy::Model::Site.create(
+      :name => 'rhynchocephalian-frizzy',
+      :floorplan => {
+        :name => 'falsehood\'s-Yiddish',
+      },
+    )
   end
 
   def end_method #this should be spaced correctly
