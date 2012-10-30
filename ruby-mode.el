@@ -602,8 +602,7 @@ and `\\' when preceded by `?'."
             (setq nest (cons (list (char-after (point)) pnt depth) nest))
             ;; same line as previous open [{(, don't indent again
             (if (and previous-nest
-                     (ruby-open-list-p previous-nest)
-                     (and (not (eq (car previous-nest) (caar nest)))))
+                     (ruby-open-list-p previous-nest))
                 nil ;; no-op
               (setq depth (1+ depth)))))
         (goto-char pnt)
