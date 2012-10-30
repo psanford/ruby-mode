@@ -96,6 +96,12 @@ class Example
     )
   end
 
-  def end_method #this should be spaced correctly
+  def end_method # this should be spaced correctly
+  end
+
+  def double_open_parens
+    assert_equal( 123, Some::Thing.foo(
+
+    ) )
   end
 end
